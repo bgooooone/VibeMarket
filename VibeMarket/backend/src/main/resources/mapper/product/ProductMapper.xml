@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shopping.product.mapper.ProductMapper">
+
+    <resultMap id="BaseResultMap" type="com.shopping.product.entity.Product">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="price" property="price"/>
+        <result column="original_price" property="originalPrice"/>
+        <result column="stock" property="stock"/>
+        <result column="sales" property="sales"/>
+        <result column="description" property="description"/>
+        <result column="detail" property="detail"/>
+        <result column="main_image" property="mainImage"/>
+        <result column="images" property="images"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM product WHERE status = 1 ORDER BY create_time DESC
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM product WHERE id = #{id} AND status = 1
+    </select>
+
+    <select id="selectByCategoryId" resultMap="BaseResultMap">
+        SELECT * FROM product WHERE category_id = #{categoryId} AND status = 1 ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByKeyword" resultMap="BaseResultMap">
+        SELECT * FROM product 
+        WHERE status = 1 
+        AND (name LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%'))
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>
+
