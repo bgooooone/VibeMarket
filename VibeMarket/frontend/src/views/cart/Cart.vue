@@ -1,5 +1,11 @@
 <template>
   <div class="cart">
+    <div class="cart-header">
+      <el-button type="primary" link @click="$router.push('/')" class="back-home-btn">
+        <el-icon><ArrowLeft /></el-icon>
+        返回首页
+      </el-button>
+    </div>
     <el-card>
       <template #header>
         <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -11,7 +17,7 @@
         <el-button type="primary" @click="$router.push('/')">去购物</el-button>
       </el-empty>
       <div v-else>
-        <el-table :data="cartList" style="width: 100%">
+        <el-table :data="cartList" style="width: 100%" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="55" />
           <el-table-column label="商品" width="300">
             <template #default="{ row }">
@@ -67,17 +73,39 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { ArrowLeft } from '@element-plus/icons-vue'
+import { getCartList, updateCart, removeFromCart, clearCart, selectCartItem } from '@/api/cart'
+import { getProductById } from '@/api/product'
 
 const router = useRouter()
 const cartList = ref([])
+const productMap = ref({})
 
 onMounted(() => {
   loadCart()
 })
 
-const loadCart = () => {
-  // TODO: 调用API加载购物车
-  cartList.value = []
+const loadCart = async () => {
+  try {
+    const carts = await getCartList()
+    cartList.value = []
+    for (const cart of carts) {
+      try {
+        const product = await getProductById(cart.productId)
+        cartList.value.push({
+          ...cart,
+          productName: product.name,
+          price: product.price,
+          stock: product.stock,
+          mainImage: product.mainImage
+        })
+      } catch (error) {
+        console.error('加载商品信息失败:', error)
+      }
+    }
+  } catch (error) {
+    console.error('加载购物车失败:', error)
+  }
 }
 
 const totalCount = computed(() => {
@@ -88,9 +116,17 @@ const totalAmount = computed(() => {
   return cartList.value.reduce((sum, item) => sum + item.price * item.quantity, 0)
 })
 
-const handleQuantityChange = (item) => {
-  // TODO: 更新购物车商品数量
-  ElMessage.success('数量已更新')
+const handleQuantityChange = async (item) => {
+  try {
+    await updateCart(item.id, {
+      productId: item.productId,
+      quantity: item.quantity,
+      selected: item.selected
+    })
+    ElMessage.success('数量已更新')
+  } catch (error) {
+    loadCart()
+  }
 }
 
 const handleRemove = async (item) => {
@@ -100,11 +136,13 @@ const handleRemove = async (item) => {
       cancelButtonText: '取消',
       type: 'warning'
     })
-    // TODO: 调用API删除商品
+    await removeFromCart(item.id)
     ElMessage.success('删除成功')
     loadCart()
-  } catch {
-    // 用户取消
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除失败:', error)
+    }
   }
 }
 
@@ -115,16 +153,42 @@ const handleClear = async () => {
       cancelButtonText: '取消',
       type: 'warning'
     })
-    // TODO: 调用API清空购物车
+    await clearCart()
     ElMessage.success('购物车已清空')
     loadCart()
-  } catch {
-    // 用户取消
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('清空失败:', error)
+    }
   }
 }
 
+const handleSelectionChange = (selection) => {
+  // 更新选中状态
+  const selectedIds = selection.map(item => item.id)
+  cartList.value.forEach(item => {
+    if (selectedIds.includes(item.id)) {
+      item.selected = 1
+      selectCartItem(item.id, 1).catch(() => {})
+    } else {
+      item.selected = 0
+      selectCartItem(item.id, 0).catch(() => {})
+    }
+  })
+}
+
 const handleCheckout = () => {
-  router.push('/checkout')
+  const selectedItems = cartList.value.filter(item => item.selected === 1)
+  if (selectedItems.length === 0) {
+    ElMessage.warning('请选择要结算的商品')
+    return
+  }
+  router.push({
+    path: '/checkout',
+    query: {
+      cartIds: selectedItems.map(item => item.id).join(',')
+    }
+  })
 }
 </script>
 
@@ -132,6 +196,16 @@ const handleCheckout = () => {
 .cart {
   max-width: 1200px;
   margin: 0 auto;
+}
+
+.cart-header {
+  margin-bottom: 20px;
+  padding: 10px 0;
+}
+
+.back-home-btn {
+  font-size: 14px;
+  padding: 0;
 }
 
 .cart-footer {

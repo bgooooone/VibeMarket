@@ -26,7 +26,59 @@
         </div>
       </el-header>
       <el-main>
-        <div class="welcome">
+        <!-- 分类展示 -->
+        <div v-if="categories.length > 0" class="categories-section">
+          <h3>商品分类</h3>
+          <el-row :gutter="20">
+            <el-col
+              v-for="category in categories"
+              :key="category.id"
+              :span="6"
+              style="margin-bottom: 20px;"
+            >
+              <el-card shadow="hover" class="category-card" @click="handleCategoryClick(category)">
+                <div class="category-content">
+                  <el-icon v-if="category.icon" :size="40"><component :is="category.icon" /></el-icon>
+                  <span class="category-name">{{ category.name }}</span>
+                </div>
+              </el-card>
+            </el-col>
+          </el-row>
+        </div>
+
+        <!-- 推荐商品 -->
+        <div v-if="recommendedProducts.length > 0" class="products-section">
+          <h3>推荐商品</h3>
+          <el-row :gutter="20">
+            <el-col
+              v-for="product in recommendedProducts"
+              :key="product.id"
+              :span="6"
+              style="margin-bottom: 20px;"
+            >
+              <el-card shadow="hover" class="product-card" @click="handleProductClick(product)">
+                <el-image
+                  :src="product.mainImage || '/default-product.jpg'"
+                  fit="cover"
+                  style="width: 100%; height: 150px;"
+                >
+                  <template #error>
+                    <div class="image-slot" style="display: flex; justify-content: center; align-items: center; width: 100%; height: 150px; background: #f5f7fa;">
+                      <span>暂无图片</span>
+                    </div>
+                  </template>
+                </el-image>
+                <div class="product-info">
+                  <h4>{{ product.name }}</h4>
+                  <div class="price">¥{{ product.price }}</div>
+                </div>
+              </el-card>
+            </el-col>
+          </el-row>
+        </div>
+
+        <!-- 欢迎信息 -->
+        <div v-if="categories.length === 0 && recommendedProducts.length === 0" class="welcome">
           <h2>欢迎来到校园购物商城</h2>
           <p>这是一个基于Vue 3 + Spring Boot的校园购物平台</p>
           <el-button type="primary" size="large" @click="$router.push({ name: 'ProductList' })">开始购物</el-button>
@@ -37,11 +89,56 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ArrowDown } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { categoryApi } from '@/api/category'
+import { productApi } from '@/api/product'
 
+const router = useRouter()
 const userStore = useUserStore()
+
+const categories = ref([])
+const recommendedProducts = ref([])
+
+onMounted(() => {
+  loadCategories()
+  loadRecommendedProducts()
+  // 如果已登录但没有用户信息，重新获取
+  if (userStore.isLoggedIn && !userStore.userInfo) {
+    userStore.getUserInfo()
+  }
+})
+
+const loadCategories = async () => {
+  try {
+    const allCategories = await categoryApi.getAllCategories()
+    // 只显示一级分类
+    categories.value = allCategories.filter(cat => cat.level === 1).slice(0, 8)
+  } catch (error) {
+    console.error('加载分类失败:', error)
+  }
+}
+
+const loadRecommendedProducts = async () => {
+  try {
+    const products = await productApi.getProductList()
+    // 取前4个作为推荐商品
+    recommendedProducts.value = (products || []).slice(0, 4)
+  } catch (error) {
+    console.error('加载推荐商品失败:', error)
+  }
+}
+
+const handleCategoryClick = (category) => {
+  router.push({ name: 'ProductList', query: { categoryId: category.id } })
+}
+
+const handleProductClick = (product) => {
+  router.push(`/products/${product.id}`)
+}
 
 const handleLogout = async () => {
   await userStore.logout()
@@ -83,14 +180,77 @@ const handleLogout = async () => {
 }
 
 .el-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.categories-section,
+.products-section {
+  margin-bottom: 40px;
+}
+
+.categories-section h3,
+.products-section h3 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.category-card {
+  cursor: pointer;
+  transition: transform 0.3s;
+  text-align: center;
+}
+
+.category-card:hover {
+  transform: translateY(-5px);
+}
+
+.category-content {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  min-height: calc(100vh - 60px);
+  gap: 10px;
+  padding: 20px;
+}
+
+.category-name {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.product-card {
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+}
+
+.product-info {
+  padding: 15px 0;
+  text-align: center;
+}
+
+.product-info h4 {
+  font-size: 14px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.product-info .price {
+  color: #f56c6c;
+  font-size: 18px;
+  font-weight: bold;
 }
 
 .welcome {
   text-align: center;
+  padding: 60px 20px;
 }
 
 .welcome h2 {

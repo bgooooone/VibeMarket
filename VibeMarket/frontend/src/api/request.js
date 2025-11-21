@@ -12,9 +12,15 @@ const request = axios.create({
 // 请求拦截器
 request.interceptors.request.use(
   config => {
+    // 如果是FormData，不设置Content-Type，让浏览器自动设置
+    if (config.data instanceof FormData) {
+      // 移除Content-Type，让浏览器自动设置（包括boundary）
+      delete config.headers['Content-Type']
+    }
+    
     // 优先使用管理员token（如果是管理员接口）
     const adminStore = useAdminStore()
-    if (adminStore.token && config.url?.includes('/admin/')) {
+    if (adminStore.token && (config.url?.includes('/admin/') || config.url?.includes('/upload/'))) {
       config.headers.Authorization = `Bearer ${adminStore.token}`
     } else {
       // 否则使用用户token

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shopping.order.mapper.OrderMapper">
+
+    <resultMap id="BaseResultMap" type="com.shopping.order.entity.Order">
+        <id column="id" property="id"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="user_id" property="userId"/>
+        <result column="total_amount" property="totalAmount"/>
+        <result column="actual_pay" property="actualPay"/>
+        <result column="status" property="status"/>
+        <result column="payment_type" property="paymentType"/>
+        <result column="payment_no" property="paymentNo"/>
+        <result column="consignee" property="consignee"/>
+        <result column="phone" property="phone"/>
+        <result column="province" property="province"/>
+        <result column="city" property="city"/>
+        <result column="district" property="district"/>
+        <result column="detail_address" property="detailAddress"/>
+        <result column="remark" property="remark"/>
+        <result column="payment_time" property="paymentTime"/>
+        <result column="delivery_time" property="deliveryTime"/>
+        <result column="receive_time" property="receiveTime"/>
+        <result column="cancel_time" property="cancelTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM orders WHERE id = #{id}
+    </select>
+
+    <select id="selectByOrderNo" resultMap="BaseResultMap">
+        SELECT * FROM orders WHERE order_no = #{orderNo}
+    </select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT * FROM orders WHERE user_id = #{userId}
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectAll" resultType="map">
+        SELECT 
+            o.id,
+            o.order_no as orderNo,
+            o.user_id as userId,
+            o.total_amount as totalAmount,
+            o.actual_pay as actualPay,
+            o.status,
+            o.payment_type as paymentType,
+            o.payment_no as paymentNo,
+            o.consignee,
+            o.phone,
+            o.province,
+            o.city,
+            o.district,
+            o.detail_address as detailAddress,
+            o.remark,
+            o.payment_time as paymentTime,
+            o.delivery_time as deliveryTime,
+            o.receive_time as receiveTime,
+            o.cancel_time as cancelTime,
+            o.create_time as createTime,
+            o.update_time as updateTime,
+            u.username as userName
+        FROM orders o
+        LEFT JOIN user u ON o.user_id = u.id
+        <where>
+            <if test="status != null">
+                AND o.status = #{status}
+            </if>
+        </where>
+        ORDER BY o.create_time DESC
+        <if test="offset != null and limit != null">
+            LIMIT #{offset}, #{limit}
+        </if>
+    </select>
+
+    <select id="countAll" resultType="int">
+        SELECT COUNT(*) FROM orders
+        <where>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO orders (order_no, user_id, total_amount, actual_pay, status, payment_type, payment_no,
+                           consignee, phone, province, city, district, detail_address, remark)
+        VALUES (#{orderNo}, #{userId}, #{totalAmount}, #{actualPay}, #{status}, #{paymentType}, #{paymentNo},
+                #{consignee}, #{phone}, #{province}, #{city}, #{district}, #{detailAddress}, #{remark})
+    </insert>
+
+    <update id="updateById">
+        UPDATE orders
+        <set>
+            <if test="status != null">status = #{status},</if>
+            <if test="paymentType != null">payment_type = #{paymentType},</if>
+            <if test="paymentNo != null">payment_no = #{paymentNo},</if>
+            <if test="paymentTime != null">payment_time = #{paymentTime},</if>
+            <if test="deliveryTime != null">delivery_time = #{deliveryTime},</if>
+            <if test="receiveTime != null">receive_time = #{receiveTime},</if>
+            <if test="cancelTime != null">cancel_time = #{cancelTime},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+</mapper>
+

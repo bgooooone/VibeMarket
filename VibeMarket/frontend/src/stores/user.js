@@ -4,7 +4,7 @@ import { userApi } from '@/api/user'
 export const useUserStore = defineStore('user', {
   state: () => ({
     token: localStorage.getItem('token') || '',
-    userInfo: null
+    userInfo: JSON.parse(localStorage.getItem('userInfo') || 'null')
   }),
 
   getters: {
@@ -29,6 +29,7 @@ export const useUserStore = defineStore('user', {
     async getUserInfo() {
       try {
         this.userInfo = await userApi.getProfile()
+        localStorage.setItem('userInfo', JSON.stringify(this.userInfo))
       } catch (error) {
         this.logout()
       }
@@ -43,6 +44,7 @@ export const useUserStore = defineStore('user', {
         this.token = ''
         this.userInfo = null
         localStorage.removeItem('token')
+        localStorage.removeItem('userInfo')
       }
     }
   }

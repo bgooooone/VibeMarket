@@ -16,7 +16,8 @@ public class ProductController {
 
     @GetMapping
     public ResponseResult<List<Product>> getAllProducts() {
-        List<Product> products = productService.getAllProducts();
+        // 普通用户只能看到上架的商品
+        List<Product> products = ((com.shopping.product.service.impl.ProductServiceImpl) productService).getPublicProducts();
         return ResponseResult.success(products);
     }
 

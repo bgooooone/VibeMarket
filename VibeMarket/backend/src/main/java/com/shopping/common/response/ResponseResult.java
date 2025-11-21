@@ -39,5 +39,13 @@ public class ResponseResult<T> implements Serializable {
     public static <T> ResponseResult<T> fail(Integer code, String message) {
         return new ResponseResult<>(code, message, null);
     }
+
+    public static <T> ResponseResult<T> error(String message) {
+        return new ResponseResult<>(500, message, null);
+    }
+
+    public static <T> ResponseResult<T> error(Integer code, String message) {
+        return new ResponseResult<>(code, message, null);
+    }
 }
 

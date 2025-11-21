@@ -49,6 +49,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
+import { productApi } from '@/api/product'
 
 const route = useRoute()
 const router = useRouter()
@@ -61,29 +62,37 @@ onMounted(() => {
   loadProduct()
 })
 
-const loadProduct = () => {
+const loadProduct = async () => {
   const productId = route.params.id
-  // TODO: 调用API加载商品详情
-  product.value = {
-    id: productId,
-    name: '示例商品',
-    price: 99.00,
-    originalPrice: 129.00,
-    stock: 100,
-    sales: 50,
-    mainImage: '/default-product.jpg',
-    description: '这是商品描述'
+  try {
+    product.value = await productApi.getProductDetail(productId)
+    if (!product.value) {
+      ElMessage.error('商品不存在')
+      router.push('/products')
+    }
+  } catch (error) {
+    console.error('加载商品详情失败:', error)
+    ElMessage.error('加载商品详情失败')
+    router.push('/products')
   }
 }
 
-const handleAddToCart = () => {
+const handleAddToCart = async () => {
   if (!userStore.isLoggedIn) {
     ElMessage.warning('请先登录')
     router.push('/login')
     return
   }
-  // TODO: 调用API添加到购物车
-  ElMessage.success('已添加到购物车')
+  try {
+    const { addToCart } = await import('@/api/cart')
+    await addToCart({
+      productId: product.value.id,
+      quantity: quantity.value
+    })
+    ElMessage.success('已添加到购物车')
+  } catch (error) {
+    console.error('添加到购物车失败:', error)
+  }
 }
 
 const handleBuyNow = () => {
@@ -92,8 +101,14 @@ const handleBuyNow = () => {
     router.push('/login')
     return
   }
-  // TODO: 跳转到结算页面
-  router.push('/checkout')
+  // 立即购买：先添加到购物车，然后跳转到结算页面
+  router.push({
+    path: '/checkout',
+    query: {
+      productId: product.value.id,
+      quantity: quantity.value
+    }
+  })
 }
 </script>
 

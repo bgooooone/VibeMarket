@@ -2,22 +2,39 @@
   <div class="product-list">
     <el-card>
       <template #header>
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
           <span>商品列表</span>
-          <el-input
-            v-model="searchKeyword"
-            placeholder="搜索商品"
-            style="width: 300px;"
-            clearable
-            @input="handleSearch"
-          >
-            <template #prefix>
-              <el-icon><Search /></el-icon>
-            </template>
-          </el-input>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <el-select
+              v-model="selectedCategoryId"
+              placeholder="选择分类"
+              clearable
+              style="width: 150px;"
+              @change="loadProducts"
+            >
+              <el-option
+                v-for="category in categories"
+                :key="category.id"
+                :label="category.name"
+                :value="category.id"
+              />
+            </el-select>
+            <el-input
+              v-model="searchKeyword"
+              placeholder="搜索商品"
+              style="width: 300px;"
+              clearable
+              @input="handleSearch"
+            >
+              <template #prefix>
+                <el-icon><Search /></el-icon>
+              </template>
+            </el-input>
+          </div>
         </div>
       </template>
-      <el-row :gutter="20">
+      <el-empty v-if="!loading && productList.length === 0" description="暂无商品" />
+      <el-row v-else :gutter="20">
         <el-col
           v-for="product in productList"
           :key="product.id"
@@ -29,7 +46,13 @@
               :src="product.mainImage || '/default-product.jpg'"
               fit="cover"
               style="width: 100%; height: 200px;"
-            />
+            >
+              <template #error>
+                <div class="image-slot" style="display: flex; justify-content: center; align-items: center; width: 100%; height: 200px; background: #f5f7fa;">
+                  <span>暂无图片</span>
+                </div>
+              </template>
+            </el-image>
             <div class="product-info">
               <h3>{{ product.name }}</h3>
               <div class="price-section">
@@ -56,28 +79,76 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { Search } from '@element-plus/icons-vue'
+import { productApi } from '@/api/product'
+import { categoryApi } from '@/api/category'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
+const route = useRoute()
 const searchKeyword = ref('')
 const productList = ref([])
 const currentPage = ref(1)
 const pageSize = ref(12)
 const total = ref(0)
+const loading = ref(false)
+const selectedCategoryId = ref(null)
+const categories = ref([])
 
 onMounted(() => {
+  loadCategories()
+  // 检查URL参数中是否有分类ID
+  if (route.query.categoryId) {
+    selectedCategoryId.value = Number(route.query.categoryId)
+  }
   loadProducts()
 })
 
-const loadProducts = () => {
-  // TODO: 调用API加载商品列表
-  productList.value = []
-  total.value = 0
+// 监听分类变化
+watch(selectedCategoryId, () => {
+  currentPage.value = 1
+  loadProducts()
+})
+
+const loadCategories = async () => {
+  try {
+    const allCategories = await categoryApi.getAllCategories()
+    categories.value = allCategories.filter(cat => cat.level === 1)
+  } catch (error) {
+    console.error('加载分类失败:', error)
+  }
+}
+
+const loadProducts = async () => {
+  loading.value = true
+  try {
+    let products = []
+    if (searchKeyword.value) {
+      // 搜索商品
+      products = await productApi.searchProducts(searchKeyword.value) || []
+    } else if (selectedCategoryId.value) {
+      // 按分类获取商品
+      products = await productApi.getProductsByCategory(selectedCategoryId.value) || []
+    } else {
+      // 获取所有商品
+      products = await productApi.getProductList() || []
+    }
+    productList.value = products
+    total.value = products.length
+  } catch (error) {
+    console.error('加载商品失败:', error)
+    ElMessage.error('加载商品失败')
+    productList.value = []
+    total.value = 0
+  } finally {
+    loading.value = false
+  }
 }
 
 const handleSearch = () => {
+  currentPage.value = 1
   loadProducts()
 }
 

@@ -24,8 +24,16 @@
         SELECT * FROM product WHERE status = 1 ORDER BY create_time DESC
     </select>
 
+    <select id="selectAllWithoutStatus" resultMap="BaseResultMap">
+        SELECT * FROM product ORDER BY create_time DESC
+    </select>
+
     <select id="selectById" resultMap="BaseResultMap">
         SELECT * FROM product WHERE id = #{id} AND status = 1
+    </select>
+
+    <select id="selectByIdWithoutStatus" resultMap="BaseResultMap">
+        SELECT * FROM product WHERE id = #{id}
     </select>
 
     <select id="selectByCategoryId" resultMap="BaseResultMap">
@@ -38,6 +46,33 @@
         AND (name LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%'))
         ORDER BY create_time DESC
     </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO product (name, category_id, price, original_price, stock, sales, description, detail, main_image, images, status)
+        VALUES (#{name}, #{categoryId}, #{price}, #{originalPrice}, #{stock}, #{sales}, #{description}, #{detail}, #{mainImage}, #{images}, #{status})
+    </insert>
+
+    <update id="updateById">
+        UPDATE product
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="originalPrice != null">original_price = #{originalPrice},</if>
+            <if test="stock != null">stock = #{stock},</if>
+            <if test="sales != null">sales = #{sales},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="detail != null">detail = #{detail},</if>
+            <if test="mainImage != null">main_image = #{mainImage},</if>
+            <if test="images != null">images = #{images},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM product WHERE id = #{id}
+    </delete>
 
 </mapper>
 

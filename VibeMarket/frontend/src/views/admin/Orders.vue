@@ -26,7 +26,9 @@
         </el-table-column>
         <el-table-column prop="consignee" label="收货人" width="120" />
         <el-table-column prop="phone" label="联系电话" width="150" />
-        <el-table-column prop="createTime" label="下单时间" width="180" />
+        <el-table-column prop="createTime" label="下单时间" width="180">
+          <template #default="{ row }">{{ formatTime(row.createTime) }}</template>
+        </el-table-column>
         <el-table-column label="操作" width="200">
           <template #default="{ row }">
             <el-button type="primary" link @click="handleViewDetail(row)">详情</el-button>
@@ -38,6 +40,14 @@
             >
               发货
             </el-button>
+            <el-button
+              v-if="row.status === 1"
+              type="warning"
+              link
+              @click="handleUpdateStatus(row, 2)"
+            >
+              标记已发货
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -47,32 +57,86 @@
         :total="total"
         layout="total, sizes, prev, pager, next, jumper"
         style="margin-top: 20px; justify-content: flex-end;"
+        @size-change="loadOrders"
+        @current-change="loadOrders"
       />
     </el-card>
+    
+    <!-- 订单详情对话框 -->
+    <el-dialog v-model="detailDialogVisible" title="订单详情" width="800px">
+      <div v-if="currentOrder">
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="订单号">{{ currentOrder.order.orderNo }}</el-descriptions-item>
+          <el-descriptions-item label="订单状态">
+            <el-tag :type="getStatusType(currentOrder.order.status)">
+              {{ getStatusText(currentOrder.order.status) }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="总金额">¥{{ currentOrder.order.totalAmount }}</el-descriptions-item>
+          <el-descriptions-item label="下单时间">{{ formatTime(currentOrder.order.createTime) }}</el-descriptions-item>
+          <el-descriptions-item label="收货人">{{ currentOrder.order.consignee }}</el-descriptions-item>
+          <el-descriptions-item label="联系电话">{{ currentOrder.order.phone }}</el-descriptions-item>
+          <el-descriptions-item label="收货地址" :span="2">
+            {{ currentOrder.order.province }} {{ currentOrder.order.city }} {{ currentOrder.order.district }} {{ currentOrder.order.detailAddress }}
+          </el-descriptions-item>
+        </el-descriptions>
+        <h4 style="margin-top: 20px;">商品信息</h4>
+        <el-table :data="currentOrder.orderItems" style="width: 100%">
+          <el-table-column label="商品" width="300">
+            <template #default="{ row }">
+              <div style="display: flex; align-items: center;">
+                <el-image
+                  :src="row.productImage || '/default-product.jpg'"
+                  style="width: 60px; height: 60px; margin-right: 10px;"
+                  fit="cover"
+                />
+                <span>{{ row.productName }}</span>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column prop="unitPrice" label="单价" width="120">
+            <template #default="{ row }">¥{{ row.unitPrice }}</template>
+          </el-table-column>
+          <el-table-column prop="quantity" label="数量" width="100" />
+          <el-table-column prop="totalPrice" label="小计" width="120">
+            <template #default="{ row }">¥{{ row.totalPrice }}</template>
+          </el-table-column>
+        </el-table>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { getAllOrders, getAdminOrderDetail, shipOrder, updateOrderStatus } from '@/api/order'
 
 const activeTab = ref('all')
 const orderList = ref([])
 const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
+const detailDialogVisible = ref(false)
+const currentOrder = ref(null)
 
 onMounted(() => {
   loadOrders()
 })
 
-const loadOrders = () => {
-  // TODO: 调用API加载订单列表
-  orderList.value = []
-  total.value = 0
+const loadOrders = async () => {
+  try {
+    const status = activeTab.value === 'all' ? null : parseInt(activeTab.value)
+    const data = await getAllOrders(status, currentPage.value, pageSize.value)
+    orderList.value = data.list || []
+    total.value = data.total || 0
+  } catch (error) {
+    console.error('加载订单失败:', error)
+  }
 }
 
 const handleTabChange = (tab) => {
+  currentPage.value = 1
   loadOrders()
 }
 
@@ -102,14 +166,46 @@ const getStatusType = (status) => {
   return typeMap[status] || ''
 }
 
-const handleViewDetail = (order) => {
-  ElMessage.info('查看详情功能开发中')
+const formatTime = (time) => {
+  if (!time) return ''
+  return new Date(time).toLocaleString('zh-CN')
 }
 
-const handleShip = (order) => {
-  // TODO: 调用API发货
-  ElMessage.success('发货成功')
-  loadOrders()
+const handleViewDetail = async (order) => {
+  try {
+    const data = await getAdminOrderDetail(order.id)
+    currentOrder.value = data
+    detailDialogVisible.value = true
+  } catch (error) {
+    console.error('加载订单详情失败:', error)
+  }
+}
+
+const handleShip = async (order) => {
+  try {
+    await ElMessageBox.confirm('确定要发货这个订单吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    await shipOrder(order.id)
+    ElMessage.success('发货成功')
+    loadOrders()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('发货失败:', error)
+    }
+  }
+}
+
+const handleUpdateStatus = async (order, status) => {
+  try {
+    await updateOrderStatus(order.id, status)
+    ElMessage.success('状态更新成功')
+    loadOrders()
+  } catch (error) {
+    console.error('更新状态失败:', error)
+  }
 }
 </script>
 
@@ -118,4 +214,3 @@ const handleShip = (order) => {
   padding: 20px;
 }
 </style>
-
