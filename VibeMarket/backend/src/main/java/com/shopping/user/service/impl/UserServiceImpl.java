@@ -38,7 +38,9 @@ public class UserServiceImpl implements UserService {
         user.setUsername(userRegisterDTO.getUsername());
         user.setPassword(passwordUtils.encode(userRegisterDTO.getPassword()));
         user.setPhone(userRegisterDTO.getPhone());
-        user.setEmail(userRegisterDTO.getEmail());
+        // 如果email为空字符串，设置为null，避免数据库唯一约束冲突
+        String email = userRegisterDTO.getEmail();
+        user.setEmail(email != null && !email.trim().isEmpty() ? email : null);
         user.setStatus(1);
 
         userMapper.insert(user);
@@ -69,6 +71,41 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserById(Long userId) {
         return userMapper.selectById(userId);
+    }
+
+    @Override
+    public User updateProfile(Long userId, User user) {
+        User existingUser = userMapper.selectById(userId);
+        if (existingUser == null) {
+            throw new BusinessException("用户不存在");
+        }
+
+        // 只允许更新特定字段
+        if (user.getPhone() != null) {
+            // 检查手机号是否被其他用户使用
+            User userByPhone = userMapper.selectByPhone(user.getPhone());
+            if (userByPhone != null && !userByPhone.getId().equals(userId)) {
+                throw new BusinessException("手机号已被其他用户使用");
+            }
+            existingUser.setPhone(user.getPhone());
+        }
+
+        if (user.getEmail() != null) {
+            // 如果email为空字符串，设置为null
+            String email = user.getEmail().trim().isEmpty() ? null : user.getEmail();
+            existingUser.setEmail(email);
+        }
+
+        if (user.getNickname() != null) {
+            existingUser.setNickname(user.getNickname());
+        }
+
+        if (user.getAvatar() != null) {
+            existingUser.setAvatar(user.getAvatar());
+        }
+
+        userMapper.updateById(existingUser);
+        return existingUser;
     }
 }
 

@@ -8,5 +8,6 @@ public interface UserService {
     User register(UserRegisterDTO userRegisterDTO);
     String login(UserLoginDTO userLoginDTO);
     User getUserById(Long userId);
+    User updateProfile(Long userId, User user);
 }
 

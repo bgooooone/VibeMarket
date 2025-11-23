@@ -33,6 +33,15 @@ export const userApi = {
       url: '/v1/auth/profile',
       method: 'get'
     })
+  },
+
+  // 更新用户信息
+  updateProfile(data) {
+    return request({
+      url: '/v1/auth/profile',
+      method: 'put',
+      data
+    })
   }
 }
 

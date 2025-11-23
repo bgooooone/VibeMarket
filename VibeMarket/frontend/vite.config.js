@@ -16,6 +16,12 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
         rewrite: (path) => path
+      },
+      // 代理上传的图片路径到后端
+      '/upload': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        rewrite: (path) => path
       }
     }
   },

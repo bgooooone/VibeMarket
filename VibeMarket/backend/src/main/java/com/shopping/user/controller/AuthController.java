@@ -47,4 +47,11 @@ public class AuthController {
         user.setPassword(null); // 不返回密码
         return ResponseResult.success(user);
     }
+
+    @PutMapping("/profile")
+    public ResponseResult<User> updateProfile(@CurrentUser User currentUser, @RequestBody User user) {
+        User updatedUser = userService.updateProfile(currentUser.getId(), user);
+        updatedUser.setPassword(null); // 不返回密码
+        return ResponseResult.success("更新成功", updatedUser);
+    }
 }

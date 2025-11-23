@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useAdminStore } from '@/stores/admin'
+import { ElMessage } from 'element-plus'
 
 const routes = [
   {
@@ -109,21 +110,65 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
   const adminStore = useAdminStore()
+  
+  // 用户登录页面：如果管理员已登录，先退出管理员登录
+  if (to.name === 'Login' || to.name === 'Register') {
+    if (adminStore.isLoggedIn) {
+      await adminStore.logout()
+      ElMessage.warning('已退出管理员登录')
+    }
+    // 如果用户已登录，重定向到首页
+    if (userStore.isLoggedIn) {
+      const redirect = to.query.redirect
+      next({ 
+        name: redirect ? undefined : 'Home',
+        path: redirect || undefined
+      })
+      return
+    }
+  }
+  
+  // 管理员登录页面：如果用户已登录，先退出用户登录
+  if (to.name === 'AdminLogin') {
+    if (userStore.isLoggedIn) {
+      await userStore.logout()
+      ElMessage.warning('已退出用户登录')
+    }
+    // 如果管理员已登录，跳转到首页
+    if (adminStore.isLoggedIn) {
+      next({ name: 'Home' })
+      return
+    }
+  }
   
   // 管理员路由检查
   if (to.meta.requiresAdmin) {
     if (!adminStore.isLoggedIn) {
-      next({ name: 'AdminLogin', query: { redirect: to.fullPath } })
+      // 保存重定向路径
+      next({ 
+        name: 'AdminLogin', 
+        query: { redirect: to.fullPath } 
+      })
     } else {
+      // 验证token有效性（可选，避免频繁请求）
       next()
     }
   }
   // 普通用户路由检查
-  else if (to.meta.requiresAuth && !userStore.isLoggedIn) {
-    next({ name: 'Login', query: { redirect: to.fullPath } })
+  else if (to.meta.requiresAuth) {
+    if (!userStore.isLoggedIn) {
+      // 保存重定向路径
+      next({ 
+        name: 'Login', 
+        query: { redirect: to.fullPath } 
+      })
+    } else {
+      // 验证token有效性（可选，避免频繁请求）
+      next()
+    }
   } else {
     next()
   }

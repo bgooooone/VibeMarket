@@ -8,17 +8,47 @@ export const useUserStore = defineStore('user', {
   }),
 
   getters: {
-    isLoggedIn: (state) => !!state.token,
+    isLoggedIn: (state) => {
+      // 检查token是否存在且有效
+      if (!state.token) {
+        return false
+      }
+      // 可以在这里添加token过期检查（如果需要）
+      // 目前依赖后端验证，前端只检查token是否存在
+      return true
+    },
     isAdmin: (state) => state.userInfo?.role === 'admin'
   },
 
   actions: {
     async login(loginData) {
+      // 如果管理员已登录，先退出管理员登录
+      const { useAdminStore } = await import('@/stores/admin')
+      const adminStore = useAdminStore()
+      if (adminStore.isLoggedIn) {
+        await adminStore.logout()
+      }
+      
       const response = await userApi.login(loginData)
       this.token = response.token
       localStorage.setItem('token', this.token)
       await this.getUserInfo()
       return response
+    },
+    
+    // 验证token是否有效
+    async validateToken() {
+      if (!this.token) {
+        return false
+      }
+      try {
+        await this.getUserInfo()
+        return true
+      } catch (error) {
+        // token无效，清除登录状态
+        this.logout()
+        return false
+      }
     },
 
     async register(registerData) {

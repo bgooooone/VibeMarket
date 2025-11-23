@@ -80,10 +80,17 @@ public class AuthInterceptor implements HandlerInterceptor {
                 }
                 request.setAttribute("currentAdmin", admin);
             } else {
-                throw new BusinessException(401, "权限不足");
+                throw new BusinessException(403, "权限不足，请使用正确的账户类型");
             }
+        } catch (BusinessException e) {
+            // 重新抛出业务异常
+            throw e;
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            throw new BusinessException(401, "token已过期，请重新登录");
+        } catch (io.jsonwebtoken.JwtException e) {
+            throw new BusinessException(401, "token无效，请重新登录");
         } catch (Exception e) {
-            throw new BusinessException(401, "token解析失败");
+            throw new BusinessException(401, "token解析失败: " + e.getMessage());
         }
 
         return true;

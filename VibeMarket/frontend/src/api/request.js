@@ -51,15 +51,37 @@ request.interceptors.response.use(
     if (error.response) {
       const { status, data } = error.response
       if (status === 401) {
+        // 根据请求路径判断是用户还是管理员
+        const url = error.config?.url || ''
         const userStore = useUserStore()
-        userStore.logout()
-        router.push('/login')
-        ElMessage.error('登录已过期，请重新登录')
+        const adminStore = useAdminStore()
+        
+        if (url.includes('/admin/')) {
+          // 管理员接口401
+          adminStore.logout()
+          router.push({ 
+            name: 'AdminLogin', 
+            query: { redirect: router.currentRoute.value.fullPath } 
+          })
+          ElMessage.error(data?.message || '管理员登录已过期，请重新登录')
+        } else {
+          // 用户接口401
+          userStore.logout()
+          router.push({ 
+            name: 'Login', 
+            query: { redirect: router.currentRoute.value.fullPath } 
+          })
+          ElMessage.error(data?.message || '登录已过期，请重新登录')
+        }
+      } else if (status === 403) {
+        ElMessage.error(data?.message || '权限不足')
       } else {
         ElMessage.error(data?.message || '请求失败')
       }
+    } else if (error.request) {
+      ElMessage.error('网络错误，请检查网络连接')
     } else {
-      ElMessage.error('网络错误，请稍后重试')
+      ElMessage.error('请求配置错误')
     }
     return Promise.reject(error)
   }
