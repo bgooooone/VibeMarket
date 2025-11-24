@@ -681,7 +681,7 @@ const handleDelete = async (address) => {
   width: 140px;
 }
 
-/* 删除确认对话框样式 */
+/* 这一部分是删除确认对话框样式 */
 :deep(.delete-confirm-btn) {
   background: #f56c6c;
   border-color: #f56c6c;
