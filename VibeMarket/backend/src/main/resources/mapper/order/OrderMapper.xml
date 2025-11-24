@@ -89,6 +89,26 @@
         </where>
     </select>
 
+    <select id="sumTotalSales" resultType="java.math.BigDecimal">
+        SELECT IFNULL(SUM(actual_pay), 0) FROM orders
+    </select>
+
+    <select id="countByDate" resultType="int">
+        SELECT COUNT(*) FROM orders
+        WHERE DATE(create_time) = #{date}
+    </select>
+
+    <select id="getOrderTrends" resultType="map">
+        SELECT 
+            DATE_FORMAT(create_time, '%Y-%m-%d') AS date,
+            COUNT(*) AS orderCount,
+            IFNULL(SUM(actual_pay), 0) AS totalAmount
+        FROM orders
+        WHERE create_time >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        GROUP BY DATE_FORMAT(create_time, '%Y-%m-%d')
+        ORDER BY date
+    </select>
+
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO orders (order_no, user_id, total_amount, actual_pay, status, payment_type, payment_no,
                            consignee, phone, province, city, district, detail_address, remark)

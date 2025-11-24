@@ -4,6 +4,8 @@ import com.shopping.order.entity.Order;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -16,5 +18,8 @@ public interface OrderMapper {
     int countAll(@Param("status") Integer status);
     int insert(Order order);
     int updateById(Order order);
+    BigDecimal sumTotalSales();
+    int countByDate(@Param("date") LocalDate date);
+    List<Map<String, Object>> getOrderTrends(@Param("days") Integer days);
 }
 

@@ -13,7 +13,8 @@
         <div class="brand-section">
           <div class="logo" @click="$router.push('/')">
             <div class="logo-icon">
-              <i class="el-icon-shopping-bag-1"></i>
+              <!-- 自定义图标 -->
+              <img src="/logo.svg" alt="校园购物商城" class="logo-image">
             </div>
             <div class="brand-text">
               <h1 class="brand-name">校园购物商城</h1>
@@ -527,16 +528,24 @@ const handleAdminLogout = async () => {
   cursor: pointer;
 }
 
+/* 修改后的logo-icon样式 */
 .logo-icon {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, #67c23a, #19be6b);
+  /* background: linear-gradient(135deg, #67c23a, #19be6b); */
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: 20px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.logo-image {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  /*filter: brightness(0) invert(1);  将图标变为白色 */
 }
 
 .brand-text h1 {

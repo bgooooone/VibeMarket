@@ -24,6 +24,49 @@ export const adminApi = {
       url: '/v1/admin/auth/profile',
       method: 'get'
     })
+  },
+
+  // 仪表盘 - 概览
+  getDashboardOverview() {
+    return request({
+      url: '/v1/admin/dashboard/overview',
+      method: 'get'
+    })
+  },
+
+  // 仪表盘 - 订单趋势
+  getDashboardTrends(params) {
+    return request({
+      url: '/v1/admin/dashboard/trends',
+      method: 'get',
+      params
+    })
+  },
+
+  // 仪表盘 - 分类分布
+  getCategoryDistribution() {
+    return request({
+      url: '/v1/admin/dashboard/categories',
+      method: 'get'
+    })
+  },
+
+  // 用户管理
+  getUsers(params) {
+    return request({
+      url: '/v1/admin/users',
+      method: 'get',
+      params
+    })
+  },
+
+  // 更新用户状态
+  updateUserStatus(id, status) {
+    return request({
+      url: `/v1/admin/users/${id}/status`,
+      method: 'put',
+      params: { status }
+    })
   }
 }
 

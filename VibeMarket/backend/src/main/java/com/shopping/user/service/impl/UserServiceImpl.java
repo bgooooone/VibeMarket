@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -106,6 +107,26 @@ public class UserServiceImpl implements UserService {
 
         userMapper.updateById(existingUser);
         return existingUser;
+    }
+
+    @Override
+    public List<User> getUserList(String keyword, Integer page, Integer pageSize) {
+        int offset = (page - 1) * pageSize;
+        return userMapper.selectList(keyword, offset, pageSize);
+    }
+
+    @Override
+    public int countUsers(String keyword) {
+        return userMapper.countList(keyword);
+    }
+
+    @Override
+    public void updateUserStatus(Long userId, Integer status) {
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException("用户不存在");
+        }
+        userMapper.updateStatus(userId, status);
     }
 }
 
