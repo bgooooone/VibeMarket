@@ -35,14 +35,14 @@ public class AddressController {
         }
         return ResponseResult.success(address);
     }
-
+    //增添地址
     @PostMapping("/add")
     public ResponseResult<Address> addAddress(@CurrentUser User currentUser,
                                             @Validated @RequestBody AddressDTO addressDTO) {
         Address address = addressService.addAddress(currentUser.getId(), addressDTO);
         return ResponseResult.success("添加成功", address);
     }
-
+    //更新地址
     @PutMapping("/{id}")
     public ResponseResult<Address> updateAddress(@CurrentUser User currentUser,
                                                 @PathVariable Long id,
@@ -50,7 +50,7 @@ public class AddressController {
         Address address = addressService.updateAddress(currentUser.getId(), id, addressDTO);
         return ResponseResult.success("更新成功", address);
     }
-
+    //删除地址
     @DeleteMapping("/{id}")
     public ResponseResult<String> deleteAddress(@CurrentUser User currentUser, @PathVariable Long id) {
         addressService.deleteAddress(currentUser.getId(), id);
