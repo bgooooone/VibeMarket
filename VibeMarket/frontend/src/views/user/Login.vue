@@ -304,7 +304,7 @@ onUnmounted(() => {
 <style scoped>
 .login-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #67c23a, #19be6b);
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   position: relative;
@@ -402,7 +402,7 @@ onUnmounted(() => {
 
 /* 左侧欢迎区域优化 */
 .welcome-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #67c23a 0%, #19be6b 100%);
   color: white;
   padding: 50px 40px;
   display: flex;
@@ -635,7 +635,7 @@ onUnmounted(() => {
   height: 50px;
   font-weight: 600;
   font-size: 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #67c23a 0%, #19be6b 100%);
   border: none;
   transition: all 0.3s ease;
   margin-bottom: 30px;

@@ -203,7 +203,7 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #67c23a 0%, #19be6b 100%);
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     sans-serif;
   position: relative;
@@ -283,7 +283,7 @@ onMounted(() => {
 }
 
 .brand-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #67c23a 0%, #19be6b 100%);
   color: white;
   padding: 60px 40px;
   display: flex;
@@ -414,7 +414,7 @@ onMounted(() => {
   height: 48px;
   font-weight: 600;
   font-size: 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #67c23a 0%, #19be6b 100%);
   border: none;
   transition: all 0.3s ease;
 }

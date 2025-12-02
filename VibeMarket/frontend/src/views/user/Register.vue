@@ -167,7 +167,7 @@ const handleRegister = async () => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #67c23a 0%, #19be6b 100%);
   position: relative;
   overflow: hidden;
   font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
@@ -241,7 +241,7 @@ const handleRegister = async () => {
   left: 0;
   width: 100%;
   height: 4px;
-  background: linear-gradient(90deg, #667eea, #764ba2);
+  background: linear-gradient(90deg, #67c23a, #19be6b);
 }
 
 .card-header {
@@ -257,7 +257,7 @@ const handleRegister = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #67c23a, #19be6b);
   border-radius: 50%;
   color: white;
 }
@@ -304,7 +304,7 @@ const handleRegister = async () => {
 }
 
 :deep(.custom-input .el-input__inner:focus) {
-  border-color: #667eea;
+  border-color: #19be6b;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -351,7 +351,7 @@ const handleRegister = async () => {
   border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #67c23a, #19be6b);
   border: none;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
   transition: all 0.3s ease;
