@@ -7,7 +7,7 @@ import App from './App.vue'
 import router from './router'
 import './styles/main.scss'
 import { useUserStore } from './stores/user'
-
+import zhCn from 'element-plus/es/locale/lang/zh-cn'
 const app = createApp(App)
 const pinia = createPinia()
 
@@ -18,7 +18,9 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 
 app.use(pinia)
 app.use(router)
-app.use(ElementPlus)
+app.use(ElementPlus, {
+  locale: zhCn
+})
 
 // 应用启动时，如果已登录，自动获取用户信息
 const userStore = useUserStore()

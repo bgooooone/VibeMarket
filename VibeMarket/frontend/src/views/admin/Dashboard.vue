@@ -33,7 +33,7 @@
       </el-col>
     </el-row>
 
-    <!-- 图表区域 - 调整布局 -->
+    <!-- 图表区域 - 调整优化布局 -->
     <el-row :gutter="24" class="charts-row">
       <el-col :xs="24" :lg="16">
         <el-card class="chart-card trend-chart-card" shadow="hover">
