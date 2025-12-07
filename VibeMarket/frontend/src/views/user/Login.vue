@@ -19,8 +19,8 @@
                   <i class="el-icon-user-solid"></i>
                 </div>
                 <div class="brand-text">
-                  <h1>企业服务平台</h1>
-                  <p>Professional Service Platform</p>
+                  <h1>校园购物商城</h1>
+                  <p>Campus Shopping Mall</p>
                 </div>
               </div>
             </div>
@@ -180,7 +180,7 @@
             <!-- 底部信息 -->
             <div class="footer-info">
               <div class="footer-content">
-                <p>&copy; 2024 企业服务平台 · 让工作更高效</p>
+                <p>&copy; 2025 校园购物商城 · 让生活更便利</p>
                 <div class="footer-links">
                   <el-link type="info" :underline="false">用户协议</el-link>
                   <el-divider direction="vertical" />
