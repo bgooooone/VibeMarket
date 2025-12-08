@@ -1,11 +1,23 @@
 <template>
-  <router-view />
+  <div id="app">
+    <router-view />
+    <AiAssistant />
+  </div>
 </template>
 
-<script setup>
+<script>
+import AiAssistant from '@/views/AiAssistant.vue';
+
+export default {
+  name: 'App',
+  components: {
+    AiAssistant
+  }
+};
 </script>
 
 <style>
+/* 保持你原来的样式 */
 * {
   margin: 0;
   padding: 0;
@@ -22,4 +34,3 @@ body {
   min-height: 100vh;
 }
 </style>
-

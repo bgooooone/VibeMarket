@@ -6,8 +6,8 @@ import router from '@/router'
 
 const request = axios.create({
   baseURL: '/api',
-  timeout: 10000
-})
+  timeout: 30000  // 增加到30秒
+});
 
 // 请求拦截器
 request.interceptors.request.use(

@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface ProductService {
     List<Product> getAllProducts();
+    List<Product> getPublicProducts();
     Product getProductById(Long id);
     List<Product> getProductsByCategoryId(Long categoryId);
     List<Product> searchProducts(String keyword);
@@ -13,5 +14,6 @@ public interface ProductService {
     Product updateProduct(Long id, ProductDTO productDTO);
     void deleteProduct(Long id);
     Product updateProductStatus(Long id, Integer status);
+
 }
 
