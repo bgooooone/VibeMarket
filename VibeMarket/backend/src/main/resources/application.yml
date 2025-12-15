@@ -53,6 +53,16 @@ file:
   upload-dir: ${UPLOAD_PATH:/app/upload}
   max-size: 10MB
 
+# Actuator配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
 # 日志配置
 logging:
   level:

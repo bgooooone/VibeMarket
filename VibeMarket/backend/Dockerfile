@@ -21,6 +21,9 @@ COPY --from=build /app/target/*.jar app.jar
 # 创建上传目录
 RUN mkdir -p /app/upload
 
+# 安装curl用于健康检查
+RUN apk add --no-cache curl
+
 EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

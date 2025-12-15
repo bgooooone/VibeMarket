@@ -17,9 +17,9 @@
             <p class="subtitle">发现优质好物，尽享购物乐趣</p>
           </div>
           <div class="filter-actions">
-            <el-button 
-              type="text" 
-              @click="handleRefresh" 
+            <el-button
+              type="text"
+              @click="handleRefresh"
               :loading="loading"
               class="refresh-btn"
             >
@@ -66,13 +66,13 @@
 
           <div class="filter-right">
             <el-button-group class="view-toggle">
-              <el-button 
+              <el-button
                 :type="viewMode === 'grid' ? 'primary' : 'default'"
                 @click="viewMode = 'grid'"
               >
                 <el-icon><Grid /></el-icon>
               </el-button>
-              <el-button 
+              <el-button
                 :type="viewMode === 'list' ? 'primary' : 'default'"
                 @click="viewMode = 'list'"
               >
@@ -103,11 +103,7 @@
             <el-icon><Search /></el-icon>
             搜索：{{ searchKeyword }}
           </el-tag>
-          <el-button 
-            type="text" 
-            @click="clearFilters"
-            class="clear-all"
-          >
+          <el-button type="text" @click="clearFilters" class="clear-all">
             清除所有
           </el-button>
         </div>
@@ -116,16 +112,12 @@
       <!-- 商品列表 -->
       <div class="products-section">
         <!-- 空状态 -->
-        <el-empty 
-          v-if="!loading && productList.length === 0" 
+        <el-empty
+          v-if="!loading && productList.length === 0"
           :description="emptyDescription"
           class="products-empty"
         >
-          <el-button 
-            type="primary" 
-            @click="clearFilters"
-            class="empty-action"
-          >
+          <el-button type="primary" @click="clearFilters" class="empty-action">
             <el-icon><Refresh /></el-icon>
             重新加载
           </el-button>
@@ -133,14 +125,14 @@
 
         <!-- 网格视图 -->
         <div v-else-if="viewMode === 'grid'" class="products-grid">
-          <div 
-            v-for="product in displayedProducts" 
-            :key="product.id" 
+          <div
+            v-for="product in displayedProducts"
+            :key="product.id"
             class="product-card-wrapper"
           >
-            <el-card 
-              shadow="hover" 
-              class="product-card" 
+            <el-card
+              shadow="hover"
+              class="product-card"
               @click="handleViewDetail(product)"
             >
               <div class="product-image">
@@ -148,7 +140,9 @@
                   :src="product.mainImage || '/default-product.jpg'"
                   fit="cover"
                   class="image"
-                  :preview-src-list="[product.mainImage || '/default-product.jpg']"
+                  :preview-src-list="[
+                    product.mainImage || '/default-product.jpg',
+                  ]"
                 >
                   <template #error>
                     <div class="image-error">
@@ -162,31 +156,46 @@
                     </div>
                   </template>
                 </el-image>
-                
+
                 <!-- 商品标签 -->
                 <div class="product-tags">
-                  <el-tag v-if="product.isNew" type="success" size="small" class="product-tag">
+                  <el-tag
+                    v-if="product.isNew"
+                    type="success"
+                    size="small"
+                    class="product-tag"
+                  >
                     新品
                   </el-tag>
-                  <el-tag v-if="product.isHot" type="danger" size="small" class="product-tag">
+                  <el-tag
+                    v-if="product.isHot"
+                    type="danger"
+                    size="small"
+                    class="product-tag"
+                  >
                     热销
                   </el-tag>
-                  <el-tag v-if="product.discount" type="warning" size="small" class="product-tag">
+                  <el-tag
+                    v-if="product.discount"
+                    type="warning"
+                    size="small"
+                    class="product-tag"
+                  >
                     {{ product.discount }}折
                   </el-tag>
                 </div>
 
                 <!-- 快速操作 -->
                 <div class="quick-actions">
-                  <el-button 
-                    circle 
+                  <el-button
+                    circle
                     class="action-btn favorite"
                     @click.stop="handleFavorite(product)"
                   >
                     <el-icon><Star /></el-icon>
                   </el-button>
-                  <el-button 
-                    circle 
+                  <el-button
+                    circle
                     class="action-btn cart"
                     @click.stop="handleAddToCart(product)"
                   >
@@ -196,17 +205,24 @@
               </div>
 
               <div class="product-info">
-                <h3 class="product-name" :title="product.name">{{ product.name }}</h3>
+                <h3 class="product-name" :title="product.name">
+                  {{ product.name }}
+                </h3>
                 <p class="product-desc" v-if="product.description">
                   {{ product.description }}
                 </p>
-                
+
                 <div class="price-section">
                   <span class="current-price">¥{{ product.price }}</span>
                   <span v-if="product.originalPrice" class="original-price">
                     ¥{{ product.originalPrice }}
                   </span>
-                  <el-tag v-if="product.discount" type="warning" size="small" class="discount-tag">
+                  <el-tag
+                    v-if="product.discount"
+                    type="warning"
+                    size="small"
+                    class="discount-tag"
+                  >
                     {{ calculateDiscount(product) }}折
                   </el-tag>
                 </div>
@@ -223,8 +239,8 @@
                 </div>
 
                 <div class="product-actions">
-                  <el-button 
-                    type="primary" 
+                  <el-button
+                    type="primary"
                     class="add-cart-btn"
                     @click.stop="handleAddToCart(product)"
                   >
@@ -239,10 +255,10 @@
 
         <!-- 列表视图 -->
         <div v-else class="products-list">
-          <el-card 
-            v-for="product in displayedProducts" 
-            :key="product.id" 
-            shadow="hover" 
+          <el-card
+            v-for="product in displayedProducts"
+            :key="product.id"
+            shadow="hover"
             class="list-product-card"
             @click="handleViewDetail(product)"
           >
@@ -260,7 +276,7 @@
                   </template>
                 </el-image>
               </div>
-              
+
               <div class="list-product-info">
                 <div class="list-main-info">
                   <h3 class="list-product-name">{{ product.name }}</h3>
@@ -286,18 +302,18 @@
                       <span>销量：{{ product.sales || 0 }}</span>
                     </div>
                   </div>
-                  
+
                   <div class="list-actions">
-                    <el-button 
-                      type="primary" 
+                    <el-button
+                      type="primary"
                       class="add-cart-btn"
                       @click.stop="handleAddToCart(product)"
                     >
                       <el-icon><ShoppingCart /></el-icon>
                       加入购物车
                     </el-button>
-                    <el-button 
-                      circle 
+                    <el-button
+                      circle
                       class="favorite-btn"
                       @click.stop="handleFavorite(product)"
                     >
@@ -333,151 +349,186 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { 
-  Search, 
-  Goods, 
-  Refresh, 
-  Collection, 
-  Grid, 
-  List, 
-  Picture, 
+import { ref, onMounted, watch, computed } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import {
+  Search,
+  Goods,
+  Refresh,
+  Collection,
+  Grid,
+  List,
+  Picture,
   Loading,
-  Star, 
-  ShoppingCart, 
+  Star,
+  ShoppingCart,
   Box,
-  TrendCharts
-} from '@element-plus/icons-vue'
-import { productApi } from '@/api/product'
-import { categoryApi } from '@/api/category'
-import { ElMessage } from 'element-plus'
+  TrendCharts,
+} from "@element-plus/icons-vue";
+import { productApi } from "@/api/product";
+import { categoryApi } from "@/api/category";
+import { addToCart } from "@/api/cart";
+import { useUserStore } from "@/stores/user";
+import { ElMessage } from "element-plus";
 
-const router = useRouter()
-const route = useRoute()
+const router = useRouter();
+const route = useRoute();
+const userStore = useUserStore();
 
-const searchKeyword = ref('')
-const productList = ref([])
-const currentPage = ref(1)
-const pageSize = ref(12)
-const total = ref(0)
-const loading = ref(false)
-const selectedCategoryId = ref(null)
-const categories = ref([])
-const viewMode = ref('grid')
+const searchKeyword = ref("");
+const productList = ref([]);
+const currentPage = ref(1);
+const pageSize = ref(12);
+const total = ref(0);
+const loading = ref(false);
+const selectedCategoryId = ref(null);
+const categories = ref([]);
+const viewMode = ref("grid");
 
 const emptyDescription = computed(() => {
   if (searchKeyword.value) {
-    return `没有找到包含"${searchKeyword.value}"的商品`
+    return `没有找到包含"${searchKeyword.value}"的商品`;
   } else if (selectedCategoryId.value) {
-    return '该分类下暂无商品'
+    return "该分类下暂无商品";
   }
-  return '暂无商品'
-})
+  return "暂无商品";
+});
 
 const displayedProducts = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value
-  const end = start + pageSize.value
-  return productList.value.slice(start, end)
-})
+  const start = (currentPage.value - 1) * pageSize.value;
+  const end = start + pageSize.value;
+  return productList.value.slice(start, end);
+});
 
 onMounted(() => {
-  loadCategories()
+  loadCategories();
   if (route.query.categoryId) {
-    selectedCategoryId.value = Number(route.query.categoryId)
+    selectedCategoryId.value = Number(route.query.categoryId);
   }
-  loadProducts()
-})
+  loadProducts();
+});
 
 watch(selectedCategoryId, () => {
-  currentPage.value = 1
-  loadProducts()
-})
+  currentPage.value = 1;
+  loadProducts();
+});
 
 const loadCategories = async () => {
   try {
-    const allCategories = await categoryApi.getAllCategories()
-    categories.value = allCategories.filter(cat => cat.level === 1)
+    const allCategories = await categoryApi.getAllCategories();
+    categories.value = allCategories.filter((cat) => cat.level === 1);
   } catch (error) {
-    console.error('加载分类失败:', error)
+    console.error("加载分类失败:", error);
   }
-}
+};
 
 const loadProducts = async () => {
-  loading.value = true
+  loading.value = true;
   try {
-    let products = []
+    let products = [];
     if (searchKeyword.value) {
-      products = await productApi.searchProducts(searchKeyword.value) || []
+      products = (await productApi.searchProducts(searchKeyword.value)) || [];
     } else if (selectedCategoryId.value) {
-      products = await productApi.getProductsByCategory(selectedCategoryId.value) || []
+      products =
+        (await productApi.getProductsByCategory(selectedCategoryId.value)) ||
+        [];
     } else {
-      products = await productApi.getProductList() || []
+      products = (await productApi.getProductList()) || [];
     }
-    
+
     // 添加模拟数据用于演示
-    productList.value = products.map(product => ({
+    productList.value = products.map((product) => ({
       ...product,
       isNew: Math.random() > 0.7,
       isHot: Math.random() > 0.8,
-      discount: Math.random() > 0.9 ? Math.floor(Math.random() * 3) + 8 : null
-    }))
-    
-    total.value = products.length
+      discount: Math.random() > 0.9 ? Math.floor(Math.random() * 3) + 8 : null,
+    }));
+
+    total.value = products.length;
   } catch (error) {
-    console.error('加载商品失败:', error)
-    ElMessage.error('加载商品失败')
-    productList.value = []
-    total.value = 0
+    console.error("加载商品失败:", error);
+    ElMessage.error("加载商品失败");
+    productList.value = [];
+    total.value = 0;
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const handleSearch = () => {
-  currentPage.value = 1
-  loadProducts()
-}
+  currentPage.value = 1;
+  loadProducts();
+};
 
 const handleCategoryChange = () => {
-  currentPage.value = 1
-  loadProducts()
-}
+  currentPage.value = 1;
+  loadProducts();
+};
 
 const handleRefresh = () => {
-  loadProducts()
-}
+  loadProducts();
+};
 
 const clearFilters = () => {
-  selectedCategoryId.value = null
-  searchKeyword.value = ''
-  currentPage.value = 1
-  loadProducts()
-}
+  selectedCategoryId.value = null;
+  searchKeyword.value = "";
+  currentPage.value = 1;
+  // 检查用户是否登录
+  if (!userStore.isLoggedIn) {
+    // 用户未登录时的处理逻辑
+  }
+};
 
 const getCategoryName = (categoryId) => {
-  const category = categories.value.find(cat => cat.id === categoryId)
-  return category ? category.name : '未知分类'
-}
+  const category = categories.value.find((cat) => cat.id === categoryId);
+  return category ? category.name : "未知分类";
+};
 
 const calculateDiscount = (product) => {
-  if (!product.originalPrice) return null
-  return Math.round((product.price / product.originalPrice) * 10)
-}
+  if (!product.originalPrice) return null;
+  const discount = (
+    ((product.originalPrice - product.price) / product.originalPrice) *
+    100
+  ).toFixed(0);
+  return discount;
+};
 
 const handleViewDetail = (product) => {
-  router.push(`/products/${product.id}`)
-}
+  router.push(`/products/${product.id}`);
+};
 
-const handleAddToCart = (product) => {
-  ElMessage.success(`已添加 ${product.name} 到购物车`)
-  // 这里可以调用购物车相关的API
-}
+const handleAddToCart = async (product) => {
+  // 更严格地检查用户是否登录
+  console.log("用户登录状态:", userStore.isLoggedIn);
+  console.log("token:", userStore.token);
+  if (!userStore.isLoggedIn || !userStore.token) {
+    ElMessage.warning("请先登录");
+    router.push("/login");
+    return;
+  }
+
+  try {
+    // 调用添加购物车API
+    console.log("调用添加购物车API，商品ID:", product.id);
+    const result = await addToCart({
+      productId: product.id,
+      quantity: 1,
+    });
+    console.log("添加购物车成功，返回结果:", result);
+    ElMessage.success(`已添加 ${product.name} 到购物车`);
+  } catch (error) {
+    console.error("添加购物车失败:", error);
+    console.error("错误详情:", error.response);
+    const errorMsg =
+      error.response?.data?.message || error.message || "添加购物车失败";
+    ElMessage.error(errorMsg);
+  }
+};
 
 const handleFavorite = (product) => {
-  ElMessage.info(`已收藏 ${product.name}`)
+  ElMessage.info(`已收藏 ${product.name}`);
   // 这里可以调用收藏相关的API
-}
+};
 </script>
 
 <style scoped>
@@ -531,7 +582,8 @@ const handleFavorite = (product) => {
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px) scale(1);
   }
   50% {
@@ -683,7 +735,8 @@ const handleFavorite = (product) => {
   transform: scale(1.05);
 }
 
-.image-error, .image-loading {
+.image-error,
+.image-loading {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -700,8 +753,12 @@ const handleFavorite = (product) => {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .product-tags {
@@ -971,42 +1028,42 @@ const handleFavorite = (product) => {
   .product-list-container {
     padding: 16px;
   }
-  
+
   .filter-controls {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .filter-left {
     flex-direction: column;
   }
-  
+
   .category-select,
   .search-input {
     width: 100%;
   }
-  
+
   .products-grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 16px;
   }
-  
+
   .list-product-content {
     flex-direction: column;
     gap: 16px;
   }
-  
+
   .list-product-image {
     width: 100%;
     height: 200px;
   }
-  
+
   .list-product-meta {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
   }
-  
+
   .meta-stats {
     justify-content: space-between;
   }
@@ -1016,12 +1073,12 @@ const handleFavorite = (product) => {
   .products-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .filter-header {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .filter-title h1 {
     font-size: 20px;
   }

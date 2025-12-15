@@ -1,18 +1,17 @@
-version: '3.8'
-
 services:
-  # MySQL数据库
+  # MySQL数据库服务
   mysql:
     image: mysql:8.0
     container_name: vibemarket-mysql
-    restart: always
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root123456
       MYSQL_DATABASE: shopping_mall
       MYSQL_USER: shopping
       MYSQL_PASSWORD: shopping123
+      MYSQL_INITDB_SKIP_TZINFO: 1 # 跳过时区表加载，加速启动
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql-data:/var/lib/mysql
       - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -23,70 +22,103 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --init-connect='SET NAMES utf8mb4' --skip-character-set-client-handshake
 
-  # 后端应用
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: vibemarket-backend
-    restart: always
-    depends_on:
-      mysql:
-        condition: service_healthy
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/shopping_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root123456
-      SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: 6379
-      JWT_SECRET: vibemarket-secret-key-2024-this-is-a-very-long-secret-key-for-jwt-signing
-      JWT_EXPIRATION: 3600
-      SERVER_PORT: 8080
-      UPLOAD_PATH: /app/upload
-    volumes:
-      - shopping-upload:/app/upload
-    ports:
-      - "8080:8080"
-    networks:
-      - vibemarket-network
-
-  # Redis缓存
+  # Redis的缓存服务
   redis:
     image: redis:6.2-alpine
     container_name: vibemarket-redis
-    restart: always
+    restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
       - redis-data:/data
     networks:
       - vibemarket-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # Nginx
+  # 后端应用服务 (Spring Boot)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vibemarket-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/shopping_mall?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root123456
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-vibemarket-secret-key-2024-this-is-a-very-long-secret-key-for-jwt-signing}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-3600}
+      SERVER_PORT: 8080
+      UPLOAD_PATH: /app/upload
+    volumes:
+      - shopping-upload:/app/upload
+    networks:
+      - vibemarket-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 前端应用服务 (Vue3)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: vibemarket-frontend
+    restart: unless-stopped
+    networks:
+      - vibemarket-network
+    depends_on:
+      - backend
+
+  # 统一网关服务 (Nginx)
   nginx:
     image: nginx:1.21-alpine
     container_name: vibemarket-nginx
-    restart: always
+    restart: unless-stopped
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_started
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/html:/usr/share/nginx/html
-      - ./nginx/logs:/var/log/nginx
+      - ./frontend/dist:/usr/share/nginx/html
       - shopping-upload:/app/upload
+      - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/logs:/var/log/nginx
     networks:
       - vibemarket-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
+# 定义数据卷
 volumes:
   mysql-data:
   redis-data:
   shopping-upload:
 
+# 定义网络
 networks:
   vibemarket-network:
     driver: bridge
-
